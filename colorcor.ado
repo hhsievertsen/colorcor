@@ -1,10 +1,15 @@
 cap program drop colorcor
 program colorcor
 /* This program creates a colored cor. matrix */
-/* Created by hhsievertsen/March 2015.*/
+/* Created by hhsievertsen/April 2015.*/
 
 syntax varlist, [nonsig(string)]
-preserve
+* create tempfile instead of preserve
+tempfile temp1
+qui: save "`temp1'"
+/* keep only variables needed*/
+keep `varlist'
+
 /* Set locals */
 	* identifier for square
 	local q=1
@@ -20,9 +25,13 @@ preserve
 /* Loop through variables and calculate correlations using reg command, improve! This is way too time consuming*/
 forval j=1/`N1'{
 * Create labels for axes
-	local xlabel=`"`xlabel'"'+`" `xlabels_i' "``j''" "'
+	loc lab: var l ``j''
+	if "`lab'"==""{
+	loc lab="``j''"
+	}
+	local xlabel=`"`xlabel'"'+`" `xlabels_i' "`lab'" "'
 	local xlabels_i=`xlabels_i'+1
-	local ylabel=`" `ylabels_i' "``j''" "'+`"`ylabel'"'
+	local ylabel=`" `ylabels_i' "`lab'" "'+`"`ylabel'"'
 	local ylabels_i=`ylabels_i'-1
 * This is a bit messy, it regs all combinations of variables
 	local start=`j'+1
@@ -43,14 +52,20 @@ forval j=1/`N1'{
 		}
 * Adds to graph string for twoway graph. 
 	local graph="`graph'"+"	(rarea up low x if correlate_id==`q',fcolor(`col')  lwidth(none) lcolor(`col') `outline'  xaxis(2)) "
+* Add correlation coefficient
+*local lines="text"+"	(rarea up low x if correlate_id==`q',fcolor(`col')  lwidth(none) lcolor(`col') `outline'  xaxis(2)) "
 * Increment counter
 	local q=`q'+1
 	}
 }
 * Add labels for last variable
-	local xlabel=`"`xlabel'"'+`" `xlabels_i' "``N''" "'
+	loc lab: var l ``N''
+	if "`lab'"==""{
+		loc lab="``N''"
+		}
+	local xlabel=`"`xlabel'"'+`" `xlabels_i' "`lab'" "'
 	local xlabel=`"`xlabel'"'+`" `xlabels_i' " " "'
-	local ylabel=`" `ylabels_i' "``N''" "'+`"`ylabel'"'
+	local ylabel=`" `ylabels_i' "`lab'" "'+`"`ylabel'"'
 	local ylabel=`"`ylabels_i' " " "'+`"`ylabel'"'
 * Creat dataset for plotting
 clear
@@ -62,7 +77,7 @@ clear
 	* expand dataset such taht there is an obs per correlation coef.
 	qui: expand `N1'-low
 	* Create x values
-	qui: qui: bys up: gen x=_n-1
+	qui:  bys up: gen x=_n-1
 	gsort x -up
 	* Gen identifier for each rectangle
 	qui: gen correlate_id=_n
@@ -75,7 +90,8 @@ twoway  (rarea up low x if correlate_id==0.5,xaxis(1))  `graph', ///
 	    ylabel(`ylabel',noticks nogrid  angle(horizontal) labsize(small)) xlabel(`xlabel',labsize(small) noticks axis(2) angle(vertical)) legend(off) graphregion(fcolor(white) lcolor(white)) xscale(off axis(1)) ///
 	   plotregion(fcolor(white) lcolor(white)) xtitle("") ytitle("") xtitle("",axis(2))  yscale(noline)   xscale(noline axis(2)) 
 
-
+* Reload original data
+use `temp1',clear
 end
 
 
