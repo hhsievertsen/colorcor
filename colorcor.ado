@@ -3,13 +3,14 @@ program colorcor
 /* This program creates a colored cor. matrix */
 /* Created by hhsievertsen/April 2015.*/
 
-syntax varlist, [nonsig(string)]
+syntax varlist [if] [in], [Nonsig(string)]
 * create tempfile instead of preserve
 tempfile temp1
 qui: save "`temp1'"
 /* keep only variables needed*/
+marksample  touse
+qui: keep if `touse'
 keep `varlist'
-
 /* Set locals */
 	* identifier for square
 	local q=1
