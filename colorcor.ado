@@ -1,7 +1,7 @@
 cap program drop colorcor
 program colorcor
 /* This program creates a colored cor. matrix */
-/* Created by hhsievertsen/April 2015.*/
+/* Created by hhsievertsen/April 2015 should updte soon.*/
 
 syntax varlist [if] [in], [Nonsig(string)]
 * create tempfile instead of preserve
