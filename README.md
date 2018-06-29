@@ -1,5 +1,5 @@
 # colorcor
-Create colored correlation matrices in Stata
+Create colored correlation matrices in Stata !
 
 The goal is to create a simple and fast program that produces colored correlation matrices.
 The syntax is
